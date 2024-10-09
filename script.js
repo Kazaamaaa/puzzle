@@ -1,7 +1,6 @@
 let draggedElement = null;
 let emptyPiece = null; // Menyimpan potongan kosong
 let dragCount = 0; // Variabel untuk menghitung jumlah drag
-let startX, startY; // Variabel untuk menyimpan posisi sentuhan awal
 
 function addDragAndDropListeners() {
     const pieces = document.querySelectorAll('.puzzle-piece');
@@ -87,6 +86,7 @@ function autoSolve() {
 
     dragCount = 0; // Reset jumlah drag
     showAutoSolveButton();
+    document.getElementById('reset-button').style.display = 'block'; // Tampilkan tombol reset
 }
 
 function checkDragCount() {
@@ -120,43 +120,58 @@ function showFireworks() {
     }, 4000); // Hentikan setelah 4 detik
 }
 
+// Fungsi untuk mereset puzzle
+function resetPuzzle() {
+    shufflePuzzle(); // Panggil fungsi untuk mengacak ulang puzzle
+    dragCount = 0; // Reset jumlah drag
+    checkDragCount(); // Cek jumlah drag untuk memperbarui tampilan
+    document.getElementById('auto-solve-button').style.display = 'none'; // Sembunyikan tombol auto-solve
+    document.getElementById('message').style.display = 'none'; // Sembunyikan pesan
+}
+
+// Tambahkan event listener untuk tombol reset
+document.getElementById('reset-button').addEventListener('click', resetPuzzle);
+
 function addTouchListeners() {
     const pieces = document.querySelectorAll('.puzzle-piece');
+
     pieces.forEach(piece => {
         piece.addEventListener('touchstart', (e) => {
             draggedElement = piece;
             piece.classList.add('dragging');
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
         });
 
         piece.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Mencegah scroll saat drag
             if (draggedElement) {
-                const touchX = e.touches[0].clientX;
-                const touchY = e.touches[0].clientY;
+                const touch = e.touches[0];
+                const rect = draggedElement.getBoundingClientRect();
 
-                const diffX = touchX - startX;
-                const diffY = touchY - startY;
-
-                // Mencari posisi potongan puzzle kosong
-                const emptyRect = emptyPiece.getBoundingClientRect();
-                const draggedRect = draggedElement.getBoundingClientRect();
-
-                // Cek jika draggedElement bisa bergerak ke posisi kosong
-                if (canMove(draggedRect, emptyRect)) {
-                    // Pindahkan potongan puzzle ke posisi kosong
-                    emptyPiece.style.transition = 'transform 0.3s ease';
-                    emptyPiece.style.transform = `translate(${diffX}px, ${diffY}px)`;
-                    emptyPiece = draggedElement; // Memperbarui potongan kosong
-                }
+                // Mendapatkan posisi potongan yang di-drag
+                draggedElement.style.position = 'absolute';
+                draggedElement.style.left = `${touch.clientX - rect.width / 2}px`;
+                draggedElement.style.top = `${touch.clientY - rect.height / 2}px`;
             }
         });
 
         piece.addEventListener('touchend', () => {
             if (draggedElement) {
-                // Menyelesaikan drag
+                const emptyRect = emptyPiece.getBoundingClientRect();
+                const draggedRect = draggedElement.getBoundingClientRect();
+
+                // Cek jika draggedElement bisa berpindah ke posisi kosong
+                if (canMove(draggedRect, emptyRect)) {
+                    // Pindahkan potongan puzzle ke posisi kosong
+                    emptyPiece.style.transition = 'transform 0.3s ease';
+                    emptyPiece.style.transform = 'translate(0, 0)'; // Reset posisi potongan kosong
+
+                    // Ganti posisi potongan yang di-drag dengan potongan kosong
+                    emptyPiece.parentNode.insertBefore(draggedElement, emptyPiece);
+                    emptyPiece = draggedElement; // Update potongan kosong
+                }
+
                 draggedElement.classList.remove('dragging');
-                draggedElement.style.transform = 'none'; // Reset posisi
+                draggedElement.style.position = 'static'; // Reset posisi
                 draggedElement = null;
 
                 dragCount++;
@@ -170,7 +185,8 @@ function addTouchListeners() {
 function canMove(draggedRect, emptyRect) {
     const isAdjacent =
         (draggedRect.left === emptyRect.right || draggedRect.right === emptyRect.left) &&
-        (draggedRect.top === emptyRect.top || draggedRect.bottom === emptyRect.bottom);
+        (draggedRect.top === emptyRect.top || draggedRect.bottom === emptyRect.top ||
+         draggedRect.top === emptyRect.bottom);
     return isAdjacent;
 }
 
