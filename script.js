@@ -147,31 +147,43 @@ function addTouchListeners() {
                 const touch = e.touches[0];
                 const rect = draggedElement.getBoundingClientRect();
 
-                // Mendapatkan posisi potongan yang di-drag
+                // Menggerakkan elemen mengikuti posisi sentuhan
                 draggedElement.style.position = 'absolute';
                 draggedElement.style.left = `${touch.clientX - rect.width / 2}px`;
                 draggedElement.style.top = `${touch.clientY - rect.height / 2}px`;
             }
         });
 
-        piece.addEventListener('touchend', () => {
+        piece.addEventListener('touchend', (e) => {
             if (draggedElement) {
-                const emptyRect = emptyPiece.getBoundingClientRect();
+                const container = document.getElementById('puzzle-container');
+                const containerRect = container.getBoundingClientRect();
                 const draggedRect = draggedElement.getBoundingClientRect();
 
-                // Cek jika draggedElement bisa berpindah ke posisi kosong
-                if (canMove(draggedRect, emptyRect)) {
-                    // Pindahkan potongan puzzle ke posisi kosong
-                    emptyPiece.style.transition = 'transform 0.3s ease';
-                    emptyPiece.style.transform = 'translate(0, 0)'; // Reset posisi potongan kosong
+                // Memastikan elemen tetap dalam area container puzzle
+                if (
+                    draggedRect.top >= containerRect.top &&
+                    draggedRect.left >= containerRect.left &&
+                    draggedRect.bottom <= containerRect.bottom &&
+                    draggedRect.right <= containerRect.right
+                ) {
+                    // Mengatur ulang posisi draggedElement agar kembali ke posisi layout normal
+                    draggedElement.style.position = 'relative';
+                    draggedElement.style.left = '0px';
+                    draggedElement.style.top = '0px';
 
-                    // Ganti posisi potongan yang di-drag dengan potongan kosong
-                    emptyPiece.parentNode.insertBefore(draggedElement, emptyPiece);
-                    emptyPiece = draggedElement; // Update potongan kosong
+                    const afterElement = getDragAfterElement(container, e.changedTouches[0].clientY);
+                    if (afterElement == null) {
+                        container.appendChild(draggedElement);
+                    } else {
+                        container.insertBefore(draggedElement, afterElement);
+                    }
+                } else {
+                    // Kembali ke posisi awal jika di luar container
+                    draggedElement.style.position = 'static';
                 }
 
                 draggedElement.classList.remove('dragging');
-                draggedElement.style.position = 'static'; // Reset posisi
                 draggedElement = null;
 
                 dragCount++;
@@ -180,7 +192,6 @@ function addTouchListeners() {
         });
     });
 }
-
 // Fungsi untuk mengecek apakah potongan puzzle bisa bergerak
 function canMove(draggedRect, emptyRect) {
     const isAdjacent =
