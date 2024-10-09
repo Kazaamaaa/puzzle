@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box; /* Memastikan padding dan border dihitung dalam ukuran elemen */
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -5,59 +9,34 @@ body {
     justify-content: center;
     height: 100vh;
     margin: 0;
-    background-color: #000;
+    background-color: #000; /* Background hitam */
+    color: white; /* Warna teks putih */
 }
 
 h1 {
     margin-bottom: 20px;
-    color: white;   
-}
-
-
-#game-container {
-    display: flex; /* Mengatur kontainer game menjadi flex untuk berdampingan */
 }
 
 #puzzle-container {
     display: grid;
-    grid-template-columns: repeat(4, 100px); /* 4 kolom */
-    grid-template-rows: repeat(4, 100px);    /* 4 baris */
-    gap: 5px;                                /* Jarak antar potongan puzzle */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Kolom responsif */
+    grid-auto-rows: 100px; /* Tinggi baris tetap */
+    gap: 5px; /* Jarak antar potongan puzzle */
+    width: 90vw; /* Lebar container responsif */
+    height: auto; /* Tinggi otomatis */
+    max-width: 400px; /* Ukuran maksimum */
+    max-height: 400px; /* Ukuran maksimum */
 }
 
 .puzzle-piece {
-    width: 100px;
-    height: 100px;
     background-image: url('anjay.JPG'); /* Path ke gambar */
-    background-size: 400px 400px; /* Sesuaikan ukuran background agar gambar utuh terbagi */
-    cursor: grab;
-    transition: transform 0.5s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Tambahkan bayangan untuk tampilan lebih baik */
+    background-size: cover; /* Memastikan gambar mengisi potongan */
+    cursor: grab; /* Tampilkan kursor grab */
+    transition: transform 0.5s ease; /* Transisi saat drag */
 }
 
-/* Posisi yang benar untuk masing-masing potongan */
-#piece-1 { background-position: 0 0; }
-#piece-2 { background-position: -100px 0; }
-#piece-3 { background-position: -200px 0; }
-#piece-4 { background-position: -300px 0; }
-
-#piece-5 { background-position: 0 -100px; }
-#piece-6 { background-position: -100px -100px; }
-#piece-7 { background-position: -200px -100px; }
-#piece-8 { background-position: -300px -100px; }
-
-#piece-9 { background-position: 0 -200px; }
-#piece-10 { background-position: -100px -200px; }
-#piece-11 { background-position: -200px -200px; }
-#piece-12 { background-position: -300px -200px; }
-
-#piece-13 { background-position: 0 -300px; }
-#piece-14 { background-position: -100px -300px; }
-#piece-15 { background-position: -200px -300px; }
-#piece-16 { background-position: -300px -300px; }
-
 .puzzle-piece:active {
-    cursor: grabbing;
+    cursor: grabbing; /* Tampilkan kursor grabbing saat di-drag */
 }
 
 button {
@@ -65,23 +44,24 @@ button {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #007bff;
-    color: white;
+    background-color: #007bff; /* Warna latar belakang tombol */
+    color: white; /* Warna teks tombol */
     border: none;
-    border-radius: 5px;
+    border-radius: 5px; /* Sudut tombol membulat */
 }
 
-.dragging {
-    opacity: 0.5; /* Supaya elemen yang sedang di-drag terlihat transparan */
-}
+/* Responsif untuk layar kecil */
+@media (max-width: 600px) {
+    #puzzle-container {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Mengubah ukuran potongan di layar kecil */
+        grid-auto-rows: 80px; /* Tinggi baris lebih kecil */
+    }
 
-#fireworks-container {
-    position: absolute; /* Agar kembang api bisa berada di belakang puzzle */
-    top: 0;
-    left: 0;
-    width: 400px; /* Atur lebar container kembang api */
-    height: 400px; /* Atur tinggi container kembang api */
-    overflow: hidden; /* Sembunyikan kembang api yang melampaui batas */
-    pointer-events: none; /* Menghindari interaksi kembang api dengan mouse */
-    z-index: 0; /* Pastikan kembang api di belakang puzzle */
+    .puzzle-piece {
+        background-size: cover; /* Memastikan gambar mengisi potongan */
+    }
+
+    button {
+        font-size: 14px; /* Ukuran font tombol lebih kecil */
+    }
 }

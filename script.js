@@ -1,5 +1,5 @@
 let draggedElement = null;
-let dragCount = 0;
+let dragCount = 0; // Variabel untuk menghitung jumlah drag
 
 function addDragAndDropListeners() {
     const pieces = document.querySelectorAll('.puzzle-piece');
@@ -15,8 +15,30 @@ function addDragAndDropListeners() {
         piece.addEventListener('dragend', (e) => {
             piece.classList.remove('dragging');
             draggedElement = null;
+
             dragCount++;
             checkDragCount();
+        });
+
+        // Tambahkan event touch untuk mobile
+        piece.addEventListener('touchstart', (e) => {
+            draggedElement = piece;
+            piece.classList.add('dragging');
+        });
+
+        piece.addEventListener('touchend', (e) => {
+            piece.classList.remove('dragging');
+            draggedElement = null;
+
+            dragCount++;
+            checkDragCount();
+        });
+
+        piece.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            piece.style.position = 'absolute';
+            piece.style.left = `${touch.pageX - piece.offsetWidth / 2}px`;
+            piece.style.top = `${touch.pageY - piece.offsetHeight / 2}px`;
         });
     });
 
@@ -32,39 +54,23 @@ function addDragAndDropListeners() {
         }
     });
 
-    // Touch Events untuk perangkat mobile
-    pieces.forEach(piece => {
-        piece.addEventListener('touchstart', (e) => {
-            draggedElement = piece;
-            piece.classList.add('dragging');
-            e.preventDefault();
-        });
-
-        piece.addEventListener('touchend', (e) => {
-            piece.classList.remove('dragging');
-            draggedElement = null;
-            dragCount++;
-            checkDragCount();
-        });
-
-        piece.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const element = document.querySelector('.dragging');
-            const containerRect = container.getBoundingClientRect();
-
-            const x = touch.clientX - containerRect.left;
-            const y = touch.clientY - containerRect.top;
-
-            element.style.position = 'absolute';
-            element.style.left = `${x - element.clientWidth / 2}px`;
-            element.style.top = `${y - element.clientHeight / 2}px`;
-        });
+    // Event listener untuk menampung potongan puzzle saat menyentuh
+    container.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const afterElement = getDragAfterElement(container, touch.clientY);
+        const dragging = document.querySelector('.dragging');
+        if (afterElement == null) {
+            container.appendChild(dragging);
+        } else {
+            container.insertBefore(dragging, afterElement);
+        }
     });
 }
 
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.puzzle-piece:not(.dragging)')];
+
     return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
@@ -79,6 +85,7 @@ function getDragAfterElement(container, y) {
 function shufflePuzzle() {
     const container = document.getElementById('puzzle-container');
     const pieces = Array.from(container.children);
+    
     for (let i = pieces.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         container.appendChild(pieces[j]);
@@ -99,10 +106,14 @@ function autoSolve() {
         piece.style.transform = 'translate(0, 0)';
     });
 
+    // Menampilkan efek kembang api
     showFireworks();
+
     document.getElementById('auto-solve-button').style.display = 'none';
     document.getElementById('message').style.display = 'none';
+
     dragCount = 0; // Reset jumlah drag
+    showAutoSolveButton();
 }
 
 function checkDragCount() {
@@ -111,6 +122,11 @@ function checkDragCount() {
         document.getElementById('message').innerText = 'Capek ya sayangku, ini susun otomatis sayangku🤍🤍🤍🤍!';
         document.getElementById('message').style.display = 'block';
     }
+}
+
+function showAutoSolveButton() {
+    const autoSolveButton = document.getElementById('auto-solve-button');
+    autoSolveButton.style.display = 'block';
 }
 
 function showFireworks() {
@@ -124,6 +140,7 @@ function showFireworks() {
     });
 
     fireworks.start();
+
     setTimeout(() => {
         fireworks.stop();
     }, 4000); // Hentikan setelah 4 detik
