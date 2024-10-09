@@ -27,9 +27,13 @@ function addDragAndDropListeners() {
         e.preventDefault();
         const afterElement = getDragAfterElement(container, e.clientY);
         const dragging = document.querySelector('.dragging');
-        if (afterElement == null) {
-            container.appendChild(dragging);
-        } else {
+
+        // Memastikan potongan yang ditarik tidak bisa keluar dari batas puzzle
+        if (afterElement === null && dragging !== emptyPiece) {
+            if (container.contains(dragging)) {
+                container.appendChild(dragging);
+            }
+        } else if (dragging !== emptyPiece) {
             container.insertBefore(dragging, afterElement);
         }
     });
@@ -90,7 +94,7 @@ function autoSolve() {
 }
 
 function checkDragCount() {
-    if (dragCount === 10) {
+    if (dragCount >= 10) { // Ubah menjadi >= untuk memungkinkan lebih dari 10 drag
         document.getElementById('auto-solve-button').style.display = 'block';
         document.getElementById('message').innerText = 'Capek ya sayangku, ini susun otomatis sayangku🤍🤍🤍🤍!';
         document.getElementById('message').style.display = 'block';
@@ -147,10 +151,10 @@ function addTouchListeners() {
                 const touch = e.touches[0];
                 const rect = draggedElement.getBoundingClientRect();
 
-                // Mendapatkan posisi potongan yang di-drag (baik secara horizontal maupun vertikal)
+                // Mendapatkan posisi potongan yang di-drag
                 draggedElement.style.position = 'absolute';
-                draggedElement.style.left = `${touch.clientX - rect.width / 2}px`;  // Gerakan horizontal
-                draggedElement.style.top = `${touch.clientY - rect.height / 2}px`;  // Gerakan vertikal
+                draggedElement.style.left = `${touch.clientX - rect.width / 2}px`;
+                draggedElement.style.top = `${touch.clientY - rect.height / 2}px`;
             }
         });
 
@@ -161,16 +165,11 @@ function addTouchListeners() {
                 const draggedRect = draggedElement.getBoundingClientRect();
 
                 // Cek jika elemen berada di dalam container puzzle
-                if (
-                    draggedRect.top >= containerRect.top &&
+                if (draggedRect.top >= containerRect.top &&
                     draggedRect.left >= containerRect.left &&
                     draggedRect.bottom <= containerRect.bottom &&
-                    draggedRect.right <= containerRect.right
-                ) {
-                    draggedElement.style.position = 'relative';  // Reset posisi relatif dalam container
-                    draggedElement.style.left = '0px';
-                    draggedElement.style.top = '0px';
-
+                    draggedRect.right <= containerRect.right) {
+                    
                     // Mendapatkan elemen setelah tempat drop
                     const afterElement = getDragAfterElement(container, e.changedTouches[0].clientY);
                     if (afterElement == null) {
@@ -179,7 +178,8 @@ function addTouchListeners() {
                         container.insertBefore(draggedElement, afterElement);
                     }
                 } else {
-                    draggedElement.style.position = 'static';  // Reset jika di-drop di luar container
+                    // Reset posisi jika di-drop di luar container
+                    draggedElement.style.position = 'static';
                 }
 
                 draggedElement.classList.remove('dragging');
