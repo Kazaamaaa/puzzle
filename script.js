@@ -52,6 +52,7 @@ function shufflePuzzle() {
     const container = document.getElementById('puzzle-container');
     const pieces = Array.from(container.children);
     
+    // Acak posisi potongan puzzle
     for (let i = pieces.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         container.appendChild(pieces[j]);
@@ -62,10 +63,12 @@ function autoSolve() {
     const container = document.getElementById('puzzle-container');
     const pieces = Array.from(container.children);
 
+    // Urutkan kembali elemen sesuai ID
     pieces.sort((a, b) => {
         return parseInt(a.id.split('-')[1]) - parseInt(b.id.split('-')[1]);
     });
 
+    // Masukkan kembali elemen ke dalam container dalam urutan yang benar
     pieces.forEach(piece => {
         container.appendChild(piece);
         piece.style.transition = 'transform 0.5s ease';
@@ -113,9 +116,44 @@ function showFireworks() {
     }, 4000); // Hentikan setelah 4 detik
 }
 
+function addTouchListeners() {
+    const container = document.getElementById('puzzle-container');
+    
+    container.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    });
+
+    container.addEventListener('touchmove', (e) => {
+        const moveX = e.touches[0].clientX;
+        const moveY = e.touches[0].clientY;
+
+        const diffX = moveX - startX;
+        const diffY = moveY - startY;
+
+        // Pastikan pergerakan minimal agar swipe dideteksi
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+            // Swipe ke kiri atau kanan
+            handleSwipe(diffX > 0 ? 'right' : 'left');
+            e.preventDefault(); // Mencegah scrolling saat swipe
+        } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 30) {
+            // Swipe ke atas atau bawah
+            handleSwipe(diffY > 0 ? 'down' : 'up');
+            e.preventDefault(); // Mencegah scrolling saat swipe
+        }
+    });
+}
+
+function handleSwipe(direction) {
+    const pieces = document.querySelectorAll('.puzzle-piece');
+    // Logika untuk menggeser potongan puzzle
+    console.log(`Swipe detected: ${direction}`);
+}
+
 window.onload = function() {
     shufflePuzzle();
     addDragAndDropListeners();
+    addTouchListeners(); // Tambahkan event listener untuk swipe
 
     const autoSolveButton = document.getElementById('auto-solve-button');
     autoSolveButton.addEventListener('click', autoSolve);
