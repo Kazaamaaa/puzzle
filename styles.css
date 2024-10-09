@@ -1,0 +1,87 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #000;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: white;   
+}
+
+
+#game-container {
+    display: flex; /* Mengatur kontainer game menjadi flex untuk berdampingan */
+}
+
+#puzzle-container {
+    display: grid;
+    grid-template-columns: repeat(4, 100px); /* 4 kolom */
+    grid-template-rows: repeat(4, 100px);    /* 4 baris */
+    gap: 5px;                                /* Jarak antar potongan puzzle */
+}
+
+.puzzle-piece {
+    width: 100px;
+    height: 100px;
+    background-image: url('anjay.JPG'); /* Path ke gambar */
+    background-size: 400px 400px; /* Sesuaikan ukuran background agar gambar utuh terbagi */
+    cursor: grab;
+    transition: transform 0.5s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Tambahkan bayangan untuk tampilan lebih baik */
+}
+
+/* Posisi yang benar untuk masing-masing potongan */
+#piece-1 { background-position: 0 0; }
+#piece-2 { background-position: -100px 0; }
+#piece-3 { background-position: -200px 0; }
+#piece-4 { background-position: -300px 0; }
+
+#piece-5 { background-position: 0 -100px; }
+#piece-6 { background-position: -100px -100px; }
+#piece-7 { background-position: -200px -100px; }
+#piece-8 { background-position: -300px -100px; }
+
+#piece-9 { background-position: 0 -200px; }
+#piece-10 { background-position: -100px -200px; }
+#piece-11 { background-position: -200px -200px; }
+#piece-12 { background-position: -300px -200px; }
+
+#piece-13 { background-position: 0 -300px; }
+#piece-14 { background-position: -100px -300px; }
+#piece-15 { background-position: -200px -300px; }
+#piece-16 { background-position: -300px -300px; }
+
+.puzzle-piece:active {
+    cursor: grabbing;
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.dragging {
+    opacity: 0.5; /* Supaya elemen yang sedang di-drag terlihat transparan */
+}
+
+#fireworks-container {
+    position: absolute; /* Agar kembang api bisa berada di belakang puzzle */
+    top: 0;
+    left: 0;
+    width: 400px; /* Atur lebar container kembang api */
+    height: 400px; /* Atur tinggi container kembang api */
+    overflow: hidden; /* Sembunyikan kembang api yang melampaui batas */
+    pointer-events: none; /* Menghindari interaksi kembang api dengan mouse */
+    z-index: 0; /* Pastikan kembang api di belakang puzzle */
+}
