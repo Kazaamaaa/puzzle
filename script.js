@@ -10,12 +10,12 @@ function addDragAndDropListeners() {
         piece.addEventListener('dragstart', (e) => {
             draggedElement = piece;
             piece.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', null); // Untuk Firefox
         });
 
         piece.addEventListener('dragend', (e) => {
             piece.classList.remove('dragging');
             draggedElement = null;
-
             dragCount++;
             checkDragCount();
         });
@@ -30,25 +30,17 @@ function addDragAndDropListeners() {
         piece.addEventListener('touchend', (e) => {
             piece.classList.remove('dragging');
             draggedElement = null;
-
             dragCount++;
             checkDragCount();
         });
 
         piece.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            piece.style.position = 'absolute';
-            piece.style.left = `${touch.pageX - piece.offsetWidth / 2}px`;
-            piece.style.top = `${touch.pageY - piece.offsetHeight / 2}px`;
-
-            const container = document.getElementById('puzzle-container');
-            const afterElement = getDragAfterElement(container, touch.clientY);
-            const dragging = document.querySelector('.dragging');
-
-            if (afterElement == null) {
-                container.appendChild(dragging);
-            } else {
-                container.insertBefore(dragging, afterElement);
+            if (draggedElement) {
+                const touch = e.touches[0];
+                piece.style.position = 'absolute'; // Atur posisi sebagai absolute
+                piece.style.left = `${touch.pageX - piece.offsetWidth / 2}px`;
+                piece.style.top = `${touch.pageY - piece.offsetHeight / 2}px`;
+                e.preventDefault(); // Mencegah scroll saat dragging
             }
         });
     });
@@ -58,12 +50,16 @@ function addDragAndDropListeners() {
         e.preventDefault();
         const afterElement = getDragAfterElement(container, e.clientY);
         const dragging = document.querySelector('.dragging');
-        
+
         if (afterElement == null) {
             container.appendChild(dragging);
         } else {
             container.insertBefore(dragging, afterElement);
         }
+    });
+
+    container.addEventListener('touchmove', (e) => {
+        e.preventDefault(); // Mencegah scroll saat dragging
     });
 }
 
