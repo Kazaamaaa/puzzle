@@ -20,20 +20,25 @@ h1 {
 
 #puzzle-container {
     display: grid;
-    grid-template-columns: repeat(4, 100px); /* 4 kolom */
-    grid-template-rows: repeat(4, 100px);    /* 4 baris */
-    gap: 5px;                                /* Jarak antar potongan puzzle */
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* Responsif */
+    gap: 5px; /* Jarak antar potongan puzzle */
+    width: 100%; /* Pastikan kontainer tidak melewati batas */
+    max-width: 400px; /* Atur lebar maksimum kontainer */
+    margin: auto; /* Tengah secara horizontal */
 }
 
 .puzzle-piece {
-    width: 100px;
-    height: 100px;
+    width: 100%; /* Menggunakan lebar penuh dari grid */
+    height: auto; /* Tinggi otomatis untuk menjaga rasio gambar */
     background-image: url('anjay.JPG'); /* Path ke gambar */
     background-size: 400px 400px; /* Sesuaikan ukuran background agar gambar utuh terbagi */
     cursor: grab;
     transition: transform 0.5s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Tambahkan bayangan untuk tampilan lebih baik */
+    aspect-ratio: 1; /* Menjaga rasio aspek agar tetap kotak */
 }
+
+
 
 /* Posisi yang benar untuk masing-masing potongan */
 #piece-1 { background-position: 0 0; }

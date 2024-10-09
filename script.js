@@ -20,10 +20,11 @@ function addDragAndDropListeners() {
             checkDragCount();
         });
 
-        // Tambahkan event touch untuk mobile
+        // Event touch untuk mobile
         piece.addEventListener('touchstart', (e) => {
             draggedElement = piece;
             piece.classList.add('dragging');
+            e.preventDefault(); // Mencegah perilaku default
         });
 
         piece.addEventListener('touchend', (e) => {
@@ -39,6 +40,16 @@ function addDragAndDropListeners() {
             piece.style.position = 'absolute';
             piece.style.left = `${touch.pageX - piece.offsetWidth / 2}px`;
             piece.style.top = `${touch.pageY - piece.offsetHeight / 2}px`;
+
+            const container = document.getElementById('puzzle-container');
+            const afterElement = getDragAfterElement(container, touch.clientY);
+            const dragging = document.querySelector('.dragging');
+
+            if (afterElement == null) {
+                container.appendChild(dragging);
+            } else {
+                container.insertBefore(dragging, afterElement);
+            }
         });
     });
 
@@ -47,19 +58,7 @@ function addDragAndDropListeners() {
         e.preventDefault();
         const afterElement = getDragAfterElement(container, e.clientY);
         const dragging = document.querySelector('.dragging');
-        if (afterElement == null) {
-            container.appendChild(dragging);
-        } else {
-            container.insertBefore(dragging, afterElement);
-        }
-    });
-
-    // Event listener untuk menampung potongan puzzle saat menyentuh
-    container.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const afterElement = getDragAfterElement(container, touch.clientY);
-        const dragging = document.querySelector('.dragging');
+        
         if (afterElement == null) {
             container.appendChild(dragging);
         } else {
@@ -106,7 +105,6 @@ function autoSolve() {
         piece.style.transform = 'translate(0, 0)';
     });
 
-    // Menampilkan efek kembang api
     showFireworks();
 
     document.getElementById('auto-solve-button').style.display = 'none';
