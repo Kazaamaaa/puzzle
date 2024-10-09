@@ -1,5 +1,7 @@
 let draggedElement = null;
+let emptyPiece = null; // Menyimpan potongan kosong
 let dragCount = 0; // Variabel untuk menghitung jumlah drag
+let startX, startY; // Variabel untuk menyimpan posisi sentuhan awal
 
 function addDragAndDropListeners() {
     const pieces = document.querySelectorAll('.puzzle-piece');
@@ -10,38 +12,14 @@ function addDragAndDropListeners() {
         piece.addEventListener('dragstart', (e) => {
             draggedElement = piece;
             piece.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', null); // Untuk Firefox
         });
 
         piece.addEventListener('dragend', (e) => {
             piece.classList.remove('dragging');
             draggedElement = null;
+
             dragCount++;
             checkDragCount();
-        });
-
-        // Event touch untuk mobile
-        piece.addEventListener('touchstart', (e) => {
-            draggedElement = piece;
-            piece.classList.add('dragging');
-            e.preventDefault(); // Mencegah perilaku default
-        });
-
-        piece.addEventListener('touchend', (e) => {
-            piece.classList.remove('dragging');
-            draggedElement = null;
-            dragCount++;
-            checkDragCount();
-        });
-
-        piece.addEventListener('touchmove', (e) => {
-            if (draggedElement) {
-                const touch = e.touches[0];
-                piece.style.position = 'absolute'; // Atur posisi sebagai absolute
-                piece.style.left = `${touch.pageX - piece.offsetWidth / 2}px`;
-                piece.style.top = `${touch.pageY - piece.offsetHeight / 2}px`;
-                e.preventDefault(); // Mencegah scroll saat dragging
-            }
         });
     });
 
@@ -50,16 +28,11 @@ function addDragAndDropListeners() {
         e.preventDefault();
         const afterElement = getDragAfterElement(container, e.clientY);
         const dragging = document.querySelector('.dragging');
-
         if (afterElement == null) {
             container.appendChild(dragging);
         } else {
             container.insertBefore(dragging, afterElement);
         }
-    });
-
-    container.addEventListener('touchmove', (e) => {
-        e.preventDefault(); // Mencegah scroll saat dragging
     });
 }
 
@@ -81,26 +54,32 @@ function shufflePuzzle() {
     const container = document.getElementById('puzzle-container');
     const pieces = Array.from(container.children);
     
+    // Acak posisi potongan puzzle
     for (let i = pieces.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         container.appendChild(pieces[j]);
     }
+
+    emptyPiece = pieces.find(piece => piece.id === 'piece-16'); // Mengasumsikan potongan kosong adalah potongan 16
 }
 
 function autoSolve() {
     const container = document.getElementById('puzzle-container');
     const pieces = Array.from(container.children);
 
+    // Urutkan kembali elemen sesuai ID
     pieces.sort((a, b) => {
         return parseInt(a.id.split('-')[1]) - parseInt(b.id.split('-')[1]);
     });
 
+    // Masukkan kembali elemen ke dalam container dalam urutan yang benar
     pieces.forEach(piece => {
         container.appendChild(piece);
         piece.style.transition = 'transform 0.5s ease';
         piece.style.transform = 'translate(0, 0)';
     });
 
+    // Menampilkan efek kembang api
     showFireworks();
 
     document.getElementById('auto-solve-button').style.display = 'none';
@@ -124,7 +103,7 @@ function showAutoSolveButton() {
 }
 
 function showFireworks() {
-    const fireworks = new Fireworks(document.getElementById('fireworks-container'), {
+    const fireworks = new Fireworks(document.getElementById('fireworks-container'), { // Menggunakan container kembang api
         opacity: 0.8,
         acceleration: 1.05,
         friction: 0.98,
@@ -132,17 +111,73 @@ function showFireworks() {
         particles: 100,
         colors: ['#ff004d', '#ffbb00', '#5cbaff', '#00e600'],
     });
-
+    
     fireworks.start();
 
+    // Hentikan efek setelah beberapa detik
     setTimeout(() => {
         fireworks.stop();
     }, 4000); // Hentikan setelah 4 detik
 }
 
+function addTouchListeners() {
+    const pieces = document.querySelectorAll('.puzzle-piece');
+    pieces.forEach(piece => {
+        piece.addEventListener('touchstart', (e) => {
+            draggedElement = piece;
+            piece.classList.add('dragging');
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+
+        piece.addEventListener('touchmove', (e) => {
+            if (draggedElement) {
+                const touchX = e.touches[0].clientX;
+                const touchY = e.touches[0].clientY;
+
+                const diffX = touchX - startX;
+                const diffY = touchY - startY;
+
+                // Mencari posisi potongan puzzle kosong
+                const emptyRect = emptyPiece.getBoundingClientRect();
+                const draggedRect = draggedElement.getBoundingClientRect();
+
+                // Cek jika draggedElement bisa bergerak ke posisi kosong
+                if (canMove(draggedRect, emptyRect)) {
+                    // Pindahkan potongan puzzle ke posisi kosong
+                    emptyPiece.style.transition = 'transform 0.3s ease';
+                    emptyPiece.style.transform = `translate(${diffX}px, ${diffY}px)`;
+                    emptyPiece = draggedElement; // Memperbarui potongan kosong
+                }
+            }
+        });
+
+        piece.addEventListener('touchend', () => {
+            if (draggedElement) {
+                // Menyelesaikan drag
+                draggedElement.classList.remove('dragging');
+                draggedElement.style.transform = 'none'; // Reset posisi
+                draggedElement = null;
+
+                dragCount++;
+                checkDragCount();
+            }
+        });
+    });
+}
+
+// Fungsi untuk mengecek apakah potongan puzzle bisa bergerak
+function canMove(draggedRect, emptyRect) {
+    const isAdjacent =
+        (draggedRect.left === emptyRect.right || draggedRect.right === emptyRect.left) &&
+        (draggedRect.top === emptyRect.top || draggedRect.bottom === emptyRect.bottom);
+    return isAdjacent;
+}
+
 window.onload = function() {
     shufflePuzzle();
     addDragAndDropListeners();
+    addTouchListeners(); // Tambahkan event listener untuk swipe
 
     const autoSolveButton = document.getElementById('auto-solve-button');
     autoSolveButton.addEventListener('click', autoSolve);

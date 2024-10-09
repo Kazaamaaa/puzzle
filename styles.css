@@ -5,22 +5,24 @@ body {
     justify-content: center;
     height: 100vh;
     margin: 0;
-    background-color: #000;
+    background-color: #111; /* Warna latar belakang lebih gelap untuk kontras yang lebih baik */
 }
 
 h1 {
     margin-bottom: 20px;
-    color: white;   
+    color: #fff;   
+    text-align: center; /* Memusatkan teks */
 }
-
 
 #game-container {
     display: flex; /* Mengatur kontainer game menjadi flex untuk berdampingan */
+    flex-direction: column; /* Mengatur agar kontainer vertikal */
+    align-items: center; /* Memusatkan konten secara horizontal */
 }
 
 #puzzle-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* Responsif */
+    grid-template-columns: repeat(4, 1fr); /* Tetapkan 4 kolom */
     gap: 5px; /* Jarak antar potongan puzzle */
     width: 100%; /* Pastikan kontainer tidak melewati batas */
     max-width: 400px; /* Atur lebar maksimum kontainer */
@@ -29,16 +31,15 @@ h1 {
 
 .puzzle-piece {
     width: 100%; /* Menggunakan lebar penuh dari grid */
-    height: auto; /* Tinggi otomatis untuk menjaga rasio gambar */
+    height: 100px; /* Tinggi tetap untuk menjaga rasio gambar */
     background-image: url('anjay.JPG'); /* Path ke gambar */
     background-size: 400px 400px; /* Sesuaikan ukuran background agar gambar utuh terbagi */
+    background-repeat: no-repeat; /* Tidak mengulangi gambar */
     cursor: grab;
-    transition: transform 0.5s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Tambahkan bayangan untuk tampilan lebih baik */
+    transition: transform 0.5s ease, box-shadow 0.3s ease; /* Tambahkan transisi bayangan */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Tambahkan bayangan untuk tampilan lebih baik */
     aspect-ratio: 1; /* Menjaga rasio aspek agar tetap kotak */
 }
-
-
 
 /* Posisi yang benar untuk masing-masing potongan */
 #piece-1 { background-position: 0 0; }
@@ -63,6 +64,7 @@ h1 {
 
 .puzzle-piece:active {
     cursor: grabbing;
+    transform: scale(0.95); /* Menambahkan efek zoom ketika di-click */
 }
 
 button {
@@ -70,10 +72,15 @@ button {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #007bff;
+    background-color: #007bff; /* Warna biru untuk tombol */
     color: white;
     border: none;
     border-radius: 5px;
+    transition: background-color 0.3s ease; /* Efek transisi pada latar belakang */
+}
+
+button:hover {
+    background-color: #0056b3; /* Warna gelap saat hover */
 }
 
 .dragging {
