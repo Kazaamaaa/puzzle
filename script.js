@@ -147,10 +147,10 @@ function addTouchListeners() {
                 const touch = e.touches[0];
                 const rect = draggedElement.getBoundingClientRect();
 
-                // Menggerakkan elemen mengikuti posisi sentuhan
+                // Mendapatkan posisi potongan yang di-drag (baik secara horizontal maupun vertikal)
                 draggedElement.style.position = 'absolute';
-                draggedElement.style.left = `${touch.clientX - rect.width / 2}px`;
-                draggedElement.style.top = `${touch.clientY - rect.height / 2}px`;
+                draggedElement.style.left = `${touch.clientX - rect.width / 2}px`;  // Gerakan horizontal
+                draggedElement.style.top = `${touch.clientY - rect.height / 2}px`;  // Gerakan vertikal
             }
         });
 
@@ -160,18 +160,18 @@ function addTouchListeners() {
                 const containerRect = container.getBoundingClientRect();
                 const draggedRect = draggedElement.getBoundingClientRect();
 
-                // Memastikan elemen tetap dalam area container puzzle
+                // Cek jika elemen berada di dalam container puzzle
                 if (
                     draggedRect.top >= containerRect.top &&
                     draggedRect.left >= containerRect.left &&
                     draggedRect.bottom <= containerRect.bottom &&
                     draggedRect.right <= containerRect.right
                 ) {
-                    // Mengatur ulang posisi draggedElement agar kembali ke posisi layout normal
-                    draggedElement.style.position = 'relative';
+                    draggedElement.style.position = 'relative';  // Reset posisi relatif dalam container
                     draggedElement.style.left = '0px';
                     draggedElement.style.top = '0px';
 
+                    // Mendapatkan elemen setelah tempat drop
                     const afterElement = getDragAfterElement(container, e.changedTouches[0].clientY);
                     if (afterElement == null) {
                         container.appendChild(draggedElement);
@@ -179,8 +179,7 @@ function addTouchListeners() {
                         container.insertBefore(draggedElement, afterElement);
                     }
                 } else {
-                    // Kembali ke posisi awal jika di luar container
-                    draggedElement.style.position = 'static';
+                    draggedElement.style.position = 'static';  // Reset jika di-drop di luar container
                 }
 
                 draggedElement.classList.remove('dragging');
