@@ -1,5 +1,6 @@
 let draggedElement = null;
 let dragCount = 0; // Variabel untuk menghitung jumlah drag
+let startX, startY; // Variabel untuk menyimpan posisi sentuhan awal
 
 function addDragAndDropListeners() {
     const pieces = document.querySelectorAll('.puzzle-piece');
@@ -117,37 +118,40 @@ function showFireworks() {
 }
 
 function addTouchListeners() {
-    const container = document.getElementById('puzzle-container');
-    
-    container.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-    });
-
-    container.addEventListener('touchmove', (e) => {
-        const moveX = e.touches[0].clientX;
-        const moveY = e.touches[0].clientY;
-
-        const diffX = moveX - startX;
-        const diffY = moveY - startY;
-
-        // Pastikan pergerakan minimal agar swipe dideteksi
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
-            // Swipe ke kiri atau kanan
-            handleSwipe(diffX > 0 ? 'right' : 'left');
-            e.preventDefault(); // Mencegah scrolling saat swipe
-        } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 30) {
-            // Swipe ke atas atau bawah
-            handleSwipe(diffY > 0 ? 'down' : 'up');
-            e.preventDefault(); // Mencegah scrolling saat swipe
-        }
-    });
-}
-
-function handleSwipe(direction) {
     const pieces = document.querySelectorAll('.puzzle-piece');
-    // Logika untuk menggeser potongan puzzle
-    console.log(`Swipe detected: ${direction}`);
+    pieces.forEach(piece => {
+        piece.addEventListener('touchstart', (e) => {
+            draggedElement = piece;
+            piece.classList.add('dragging');
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+
+        piece.addEventListener('touchmove', (e) => {
+            if (draggedElement) {
+                const touchX = e.touches[0].clientX;
+                const touchY = e.touches[0].clientY;
+
+                const diffX = touchX - startX;
+                const diffY = touchY - startY;
+
+                // Pindahkan potongan puzzle sesuai sentuhan
+                draggedElement.style.transform = `translate(${diffX}px, ${diffY}px)`;
+            }
+        });
+
+        piece.addEventListener('touchend', () => {
+            if (draggedElement) {
+                // Menyelesaikan drag
+                draggedElement.classList.remove('dragging');
+                draggedElement.style.transform = 'none'; // Reset posisi
+                draggedElement = null;
+
+                dragCount++;
+                checkDragCount();
+            }
+        });
+    });
 }
 
 window.onload = function() {
